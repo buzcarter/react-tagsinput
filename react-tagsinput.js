@@ -195,7 +195,14 @@
         for (var i = 0; i < clone.length; i += 1) {
           if (clone[i] === tag) {
             clone.splice(i, 1);
-            this.props.onTagRemove(tag);
+
+            this.setState({
+              tag: ""
+              , invalid: false
+            }, function () {
+              this.props.onTagRemove(tag);
+            });
+
             return clone;
           }
         }
