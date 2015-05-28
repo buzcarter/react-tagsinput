@@ -213,6 +213,13 @@
       var add = this.props.addKeys.indexOf(e.keyCode) !== -1
         , remove = this.props.removeKeys.indexOf(e.keyCode) !== -1;
 
+      if (e.keyCode === 27){
+        this.setState({
+          tag: ""
+          , invalid: false
+        });
+      }
+
       if (add) {
         e.preventDefault();
         this.addTag(this.state.tag);
