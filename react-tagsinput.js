@@ -59,6 +59,7 @@
       , addKeys: React.PropTypes.array
       , removeKeys: React.PropTypes.array
       , addOnBlur: React.PropTypes.bool
+      , onKeyDown: React.PropTypes.func
       , onChange: React.PropTypes.func
       , onChangeInput: React.PropTypes.func
       , onBlur: React.PropTypes.func
@@ -77,6 +78,7 @@
         , addKeys: [13, 9]
         , removeKeys: [8]
         , addOnBlur: true
+        , onKeyDown: function () { }
         , onChange: function () { }
         , onChangeInput: function () { }
         , onBlur: function () { }
@@ -227,6 +229,10 @@
 
       if (remove && this._value().length > 0 && this.state.tag === "") {
         this.removeTag(this._value()[this._value().length - 1]);
+      }
+
+      if (!add && !remove){
+        this.props.onKeyDown(e);
       }
     }
 
