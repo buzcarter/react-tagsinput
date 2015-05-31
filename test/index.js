@@ -43,6 +43,14 @@ describe("TagsInput", function () {
     return component;
   };
 
+  var changeTag = function (tagsinput, tag) {
+    var input = TestUtils.findRenderedDOMComponentWithTag(tagsinput, "input");
+
+    TestUtils.Simulate.change(input, { target: { value: tag } });
+
+    return input;
+  };
+
   var addTag = function (tagsinput, tag, blur) {
     var input = TestUtils.findRenderedDOMComponentWithTag(tagsinput, "input");
 
@@ -251,6 +259,28 @@ describe("TagsInput", function () {
         done()
       }, 100);
     });
+
+    it("should clear tags", function () {
+      var tagsinput = createTagsInput({
+      }).tagsInput();
+
+      var tag = randomString();
+
+      var input = changeTag(tagsinput, tag);
+
+      assert.equal(input.props.value, tag);
+
+      tagsinput.clear();
+
+      assert.equal(input.props.value, "");
+    });
+
+    it("should focus input", function () {
+      var tagsinput = createTagsInput({
+      }).tagsInput();
+
+      TestUtils.Simulate.click(tagsinput.getDOMNode());
+    });
   });
 
   describe("props", function () {
@@ -373,6 +403,53 @@ describe("TagsInput", function () {
 
       addTag(tagsinput, "");
     });
+
+    it("if nothing has changed callbacks should not fire", function () {
+      var tagsinput = createTagsInput({
+        valueLink: null,
+        onTagAdd: function (tag) {
+          assert.ok(false);
+        },
+        onTagRemove: function (tag) {
+          assert.ok(false);
+        }
+      }).tagsInput();
+
+      tagsinput.addTag("");
+      tagsinput.removeTag("tag1");
+    });
+
+    it("test keyUp and keyDown props", function () {
+      var tagsinput = createTagsInput({
+        onKeyDown: function (e) {
+          assert.equal(e.keyCode, 27);
+        }
+        , onKeyUp: function (e) {
+          assert.equal(e.keyCode, 27);
+        }
+      }).tagsInput();
+
+      var tag = randomString();
+
+      var input = addTag(tagsinput, tag);
+
+      TestUtils.Simulate.keyDown(input, {keyCode: 27});
+
+      TestUtils.Simulate.keyUp(input, {keyCode: 27});
+    });
+
+    it("test keyUp and keyDown props", function () {
+      var tagsinput = createTagsInput({
+      }).tagsInput();
+
+      var tag = randomString();
+
+      var input = addTag(tagsinput, tag);
+
+      TestUtils.Simulate.keyDown(input, {keyCode: 27});
+
+      TestUtils.Simulate.keyUp(input, {keyCode: 27});
+    });
   });
 
   describe("bugs", function () {
@@ -399,6 +476,21 @@ describe("TagsInput", function () {
       assert.equal(tags[0], "aaa");
       assert.equal(tags[1], "bbb");
       assert.equal(tags[2], "ccc");
+    });
+
+    it("issue #15", function () {
+      var tagsinput = createTagsInput({
+        valueLink: null,
+        onTagAdd: function (tag) {
+          assert.equal(tagsinput.getTags().length, 1);
+        },
+        onTagRemove: function (tag) {
+          assert.equal(tagsinput.getTags().length, 0);
+        }
+      }).tagsInput();
+
+      tagsinput.addTag("tag1");
+      tagsinput.removeTag("tag1");
     });
   });
 });

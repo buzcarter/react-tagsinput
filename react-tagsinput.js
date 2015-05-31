@@ -59,10 +59,11 @@
       , addKeys: React.PropTypes.array
       , removeKeys: React.PropTypes.array
       , addOnBlur: React.PropTypes.bool
-      , onKeyDown: React.PropTypes.func
       , onChange: React.PropTypes.func
       , onChangeInput: React.PropTypes.func
       , onBlur: React.PropTypes.func
+      , onKeyDown: React.PropTypes.func
+      , onKeyUp: React.PropTypes.func
       , onTagAdd: React.PropTypes.func
       , onTagRemove: React.PropTypes.func
       , transform: React.PropTypes.func
@@ -78,10 +79,11 @@
         , addKeys: [13, 9]
         , removeKeys: [8]
         , addOnBlur: true
-        , onKeyDown: function () { }
         , onChange: function () { }
         , onChangeInput: function () { }
         , onBlur: function () { }
+        , onKeyDown: function () { }
+        , onKeyUp: function () { }
         , onTagAdd: function () { }
         , onTagRemove: function () { }
         , transform: function (tag) { return tag.trim(); }
@@ -128,8 +130,10 @@
 
       this.setState(function (state) {
         var newValue = fn(state.value);
-        this.props.onChange(newValue, tag);
-        return { value: newValue };
+        if (newValue) {
+          this.props.onChange(newValue, tag);
+          return { value: newValue };
+        }
       });
     }
 
@@ -199,8 +203,7 @@
             clone.splice(i, 1);
 
             this.setState({
-              tag: ""
-              , invalid: false
+              invalid: false
             }, function () {
               this.props.onTagRemove(tag);
             });
@@ -215,13 +218,6 @@
       var add = this.props.addKeys.indexOf(e.keyCode) !== -1
         , remove = this.props.removeKeys.indexOf(e.keyCode) !== -1;
 
-      if (e.keyCode === 27){
-        this.setState({
-          tag: ""
-          , invalid: false
-        });
-      }
-
       if (add) {
         e.preventDefault();
         this.addTag(this.state.tag);
@@ -231,7 +227,7 @@
         this.removeTag(this._value()[this._value().length - 1]);
       }
 
-      if (!add && !remove){
+      if (!add && !remove) {
         this.props.onKeyDown(e);
       }
     }
@@ -256,8 +252,18 @@
       this.props.onBlur();
     }
 
+    , clear: function () {
+      this.setState({ tag: "", invalid: false });
+    }
+
     , focus: function () {
       this.refs.input.getDOMNode().focus();
+    }
+
+    , handleClick: function (e) {
+      if (e.target === this.getDOMNode()) {
+        this.focus();
+      }
     }
 
     , render: function() {
@@ -275,7 +281,7 @@
       return (
         React.createElement("div", {
           className: ns + "tagsinput"
-          , onClick: this.focus
+          , onClick: this.handleClick
         }, tagNodes, React.createElement(Input, {
           ref: "input"
           , ns: ns
@@ -284,6 +290,7 @@
           , invalid: this.state.invalid
           , validating: this.state.validating
           , onKeyDown: this.onKeyDown
+          , onKeyUp: this.props.onKeyUp
           , onChange: this.onChange
           , onBlur: this.onBlur
         }))
